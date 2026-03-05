@@ -9,27 +9,38 @@ st.set_page_config(
     layout="centered"
 )
 
-# Har dafa server par latest version update karne ke liye
+# Server par 'yt-dlp' update karne ke liye (errors fix karta hai)
 os.system("pip install -U yt-dlp")
 
-# 2. Advanced UI with Fixed Colors
+# 2. Advanced Professional UI (Fixed Red Theme)
 st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(135deg, #0e1117 0%, #050505 100%);
+        background: linear-gradient(135deg, #FF4B4B 0%, #FF1F1F 100%);
         color: white;
     }
     .main-title {
         font-size: 3.5rem;
         font-weight: 900;
         text-align: center;
-        color: #FF4B4B;
+        color: white;
         margin-bottom: 0px;
     }
     .sub-text {
         text-align: center;
-        color: #888;
+        color: #fdd;
         font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+    /* Fixed Supported Platforms Text Style */
+    .supported-platforms {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 12px;
         margin-bottom: 2rem;
     }
     .stDownloadButton > button {
@@ -44,22 +55,32 @@ st.markdown("""
     .stButton>button {
         width: 100%;
         border-radius: 12px;
-        background-color: #FF4B4B !important;
+        background-color: #262730 !important;
         color: white !important;
         font-weight: bold;
         height: 3.5em;
         border: none;
     }
-    input { border-radius: 12px !important; }
+    input {
+        border-radius: 12px !important;
+        background-color: white !important;
+        color: black !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. Header
+# 3. Header & Big Feature List
 st.markdown("<h1 class='main-title'>🎬 SnapLoader Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-text'>The Ultimate All-in-One Video Downloader</p>", unsafe_allow_html=True)
 
-with st.expander("✨ Supported Platforms"):
-    st.write("- YouTube (4K/1080p), TikTok (No Watermark), Instagram, Facebook, Twitter & more.")
+# YOUR REQUEST: Big Text for Supported Platforms (No Dropdown)
+st.markdown("""
+<div class='supported-platforms'>
+    📥 Supported Platforms:<br>
+    YouTube (4K/1080p), Instagram, TikTok,<br>
+    Twitter (X), Facebook, and 1000+ more!
+</div>
+""", unsafe_allow_html=True)
 
 # 4. Input Section
 url = st.text_input("🔗 Paste link here:", placeholder="https://...")
@@ -67,3 +88,61 @@ url = st.text_input("🔗 Paste link here:", placeholder="https://...")
 col1, col2 = st.columns(2)
 with col1:
     format_type = st.selectbox("Type:", ["Video", "Audio (MP3)"])
+with col2:
+    quality = st.selectbox("Quality:", ["Best Available", "1080p", "720p", "480p", "360p"])
+
+# 5. Fixed Download Logic
+if url:
+    try:
+        with st.spinner('🚀 Processing... Please wait.'):
+            # Quality Mapping
+            q_map = {
+                "1080p": "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
+                "720p": "bestvideo[height<=720]+bestaudio/best[height<=720]",
+                "480p": "bestvideo[height<=480]+bestaudio/best[height<=480]",
+                "360p": "bestvideo[height<=360]+bestaudio/best[height<=360]",
+                "Best Available": "best"
+            }
+            
+            final_format = q_map[quality] if format_type == "Video" else "bestaudio/best"
+
+            ydl_opts = {
+                'format': final_format,
+                'outtmpl': 'download_%(title)s.%(ext)s',
+                'quiet': True,
+                'no_warnings': True,
+                'nocheckcertificate': True,
+                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+            }
+
+            if format_type == "Audio (MP3)":
+                ydl_opts['postprocessors'] = [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                }]
+
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=True)
+                filename = ydl.prepare_filename(info)
+                if format_type == "Audio (MP3)":
+                    filename = filename.rsplit('.', 1)[0] + ".mp3"
+
+            st.balloons()
+            st.success(f"Ready: {info.get('title', 'Video')[:50]}...")
+            
+            with open(filename, "rb") as file:
+                st.download_button(
+                    label=f"✅ CLICK TO DOWNLOAD {format_type}",
+                    data=file,
+                    file_name=os.path.basename(filename),
+                    mime="video/mp4" if format_type == "Video" else "audio/mpeg"
+                )
+            os.remove(filename)
+
+    except Exception as e:
+        st.error("Error: YouTube or Instagram is blocking. Public links work best.")
+        st.warning(f"Details: {e}")
+
+st.divider()
+st.markdown("<div style='text-align: center; color: #fdd;'>SnapLoader Pro © 2026 | Safe • Fast • Free</div>", unsafe_allow_html=True)
