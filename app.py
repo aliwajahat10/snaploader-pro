@@ -9,14 +9,14 @@ st.set_page_config(
     layout="centered"
 )
 
-# Server par 'yt-dlp' update karne ke liye (errors fix karta hai)
+# Har dafa naya version check karne ke liye
 os.system("pip install -U yt-dlp")
 
-# 2. Advanced Professional UI (Fixed Red Theme)
+# 2. Premium Dark UI
 st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(135deg, #FF4B4B 0%, #FF1F1F 100%);
+        background-color: #0e1117;
         color: white;
     }
     .main-title {
@@ -28,19 +28,19 @@ st.markdown("""
     }
     .sub-text {
         text-align: center;
-        color: #fdd;
+        color: #888;
         font-size: 1.1rem;
         margin-bottom: 2rem;
     }
-    /* Fixed Supported Platforms Text Style */
     .supported-platforms {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
         font-weight: bold;
-        color: white;
+        color: #FF4B4B;
         text-align: center;
-        background-color: rgba(255, 255, 255, 0.1);
-        padding: 15px;
-        border-radius: 12px;
+        background-color: #1a1c24;
+        padding: 20px;
+        border: 1px solid #333;
+        border-radius: 15px;
         margin-bottom: 2rem;
     }
     .stDownloadButton > button {
@@ -55,7 +55,7 @@ st.markdown("""
     .stButton>button {
         width: 100%;
         border-radius: 12px;
-        background-color: #262730 !important;
+        background-color: #FF4B4B !important;
         color: white !important;
         font-weight: bold;
         height: 3.5em;
@@ -63,17 +63,16 @@ st.markdown("""
     }
     input {
         border-radius: 12px !important;
-        background-color: white !important;
-        color: black !important;
+        background-color: #262730 !important;
+        color: white !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. Header & Big Feature List
+# 3. Header
 st.markdown("<h1 class='main-title'>🎬 SnapLoader Pro</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-text'>The Ultimate All-in-One Video Downloader</p>", unsafe_allow_html=True)
 
-# YOUR REQUEST: Big Text for Supported Platforms (No Dropdown)
 st.markdown("""
 <div class='supported-platforms'>
     📥 Supported Platforms:<br>
@@ -91,11 +90,10 @@ with col1:
 with col2:
     quality = st.selectbox("Quality:", ["Best Available", "1080p", "720p", "480p", "360p"])
 
-# 5. Fixed Download Logic
+# 5. Enhanced Download Logic (To Fix 403 Forbidden)
 if url:
     try:
         with st.spinner('🚀 Processing... Please wait.'):
-            # Quality Mapping
             q_map = {
                 "1080p": "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
                 "720p": "bestvideo[height<=720]+bestaudio/best[height<=720]",
@@ -112,7 +110,12 @@ if url:
                 'quiet': True,
                 'no_warnings': True,
                 'nocheckcertificate': True,
-                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'source_address': '0.0.0.0', # Force IPv4
+                'headers': {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                    'Accept': '*/*',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                },
             }
 
             if format_type == "Audio (MP3)":
@@ -141,8 +144,8 @@ if url:
             os.remove(filename)
 
     except Exception as e:
-        st.error("Error: YouTube or Instagram is blocking. Public links work best.")
+        st.error("Error: The platform is blocking the request. Try 'Best Available' or refresh.")
         st.warning(f"Details: {e}")
 
 st.divider()
-st.markdown("<div style='text-align: center; color: #fdd;'>SnapLoader Pro © 2026 | Safe • Fast • Free</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: #555;'>SnapLoader Pro © 2026 | Safe • Fast • Free</div>", unsafe_allow_html=True)
